@@ -84,22 +84,23 @@ the `@State` method, and replays the request against the real server. In CI the 
 | # | Bug | Caught by |
 | --- | --- | --- |
 | M1 | loans last 15 days | loans, Cucumber |
-| M2 | no cap on fines | fine table |
+| M2 | no cap on fines | fine table, Cucumber |
 | M3 | late days counted one too early | fine table, Cucumber |
-| M4 | exactly 5.00 already blocks | `finesBlock` |
+| M4 | exactly 5.00 already blocks | `finesBlock`, Cucumber |
 | M5 | four books allowed | Pact provider state, loans, Cucumber |
 | M6 | two copies of one title | loans |
 | M7 | a loan can be returned twice | loans |
 | M8 | e-mails compared case-sensitively | members |
-| M9 | ISBN check digit not verified | WireMock: the catalogue got a call it should not |
+| M9 | ISBN check digit not verified | books (the error message), WireMock (the catalogue got a call) |
 | M10 | no retry | WireMock |
 | M11 | catalogue 404 reported as a failure | WireMock |
 | M12 | no request timeout | WireMock (`time(lessThan(1400L))`) |
 | M13 | any content type accepted | HTTP rules |
 | M14 | duplicate JSON keys accepted | HTTP rules |
 
-14 of 14. M9 is a nice case: the API tests reject the bad ISBN anyway — later, with a different error — but only the
-WireMock call count shows that an invalid value leaked to a paid external service.
+14 of 14 (the CI job lists the failing classes for each). M9 is a nice case: without the check the request still
+fails, with 422 from the catalogue instead of 400, and the WireMock call count shows that an invalid value reached
+an external service it should never have reached.
 
 ## 6. Building without a local Maven repository
 
