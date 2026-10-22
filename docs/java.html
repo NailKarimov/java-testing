@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en" data-default-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Library API tests in Java</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: a library loan desk. A fine calculator over the boundary table, the WireMock fault table with call
+   counts, a Gherkin scenario next to its steps, the Pact handshake, the mutant table, commands. */
+:root {
+  --bg: #eef0f4; --surface: #ffffff; --sunken: #e2e6ee; --ink: #141720; --muted: #5a6070; --line: #cfd4df;
+  --accent: #9a3b2e; --accent-soft: #f6e0dc; --px: #0f6b73; --px-soft: #d5eeee;
+  --ok: #17784b; --ok-soft: #d8f1e3; --bad: #b42318; --bad-soft: #fbe1dd; --warn: #8a6100; --warn-soft: #f7ebc8;
+  --font-display: 'Bricolage Grotesque', 'Public Sans', system-ui, sans-serif;
+  --font-body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101219; --surface: #181b24; --sunken: #20242f; --ink: #e8eaf1; --muted: #a0a6b5; --line: #2e3341;
+    --accent: #f08f80; --accent-soft: #3a1612; --px: #6fd3db; --px-soft: #0f3134;
+    --ok: #62d49a; --ok-soft: #12321f; --bad: #ff8a7d; --bad-soft: #3d1714; --warn: #f1c35a; --warn-soft: #3a2d0c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101219; --surface: #181b24; --sunken: #20242f; --ink: #e8eaf1; --muted: #a0a6b5; --line: #2e3341;
+  --accent: #f08f80; --accent-soft: #3a1612; --px: #6fd3db; --px-soft: #0f3134;
+  --ok: #62d49a; --ok-soft: #12321f; --bad: #ff8a7d; --bad-soft: #3d1714; --warn: #f1c35a; --warn-soft: #3a2d0c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--font-body); margin: 0; }
+body[data-lang="ru"] [lang="en"], body[data-lang="en"] [lang="ru"] { display: none !important; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.1; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 50px); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(22px, 2.8vw, 30px); font-weight: 800; letter-spacing: -0.01em; }
+h3 { font-size: 16px; font-weight: 600; }
+p { margin: 0; max-width: 70ch; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+a { color: var(--accent); }
+button { font-family: var(--font-body); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.eyebrow { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+header.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 20px; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { font: 500 13px var(--font-mono); background: transparent; color: var(--muted); border: 0; padding: 6px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.hero { display: grid; gap: 16px; padding-block: 8px; }
+.hero .lead { font-size: 18px; color: var(--muted); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
+.facts b { font: 800 24px var(--font-display); color: var(--ink); margin-right: 6px; font-variant-numeric: tabular-nums; }
+section.station { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding-block: 52px 0; }
+section.station > header { display: grid; gap: 8px; }
+.num { font: 700 13px var(--font-mono); color: var(--accent); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips button { font: 500 13.5px var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 780px) { .two { grid-template-columns: minmax(0, 1fr); } }
+pre.code { margin: 0; background: var(--sunken); border-radius: 8px; padding: 10px 12px; font: 400 12.5px/1.55 var(--font-mono); overflow-x: auto; white-space: pre; }
+.tag { font: 600 11px var(--font-mono); padding: 2px 7px; border-radius: 4px; display: inline-block; white-space: nowrap; }
+.tag.ok { background: var(--ok-soft); color: var(--ok); } .tag.bad { background: var(--bad-soft); color: var(--bad); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); } .tag.ac { background: var(--accent-soft); color: var(--accent); }
+.tag.px { background: var(--px-soft); color: var(--px); }
+.state { border-radius: 12px; padding: 14px; display: grid; gap: 4px; font-size: 15px; }
+.state.ok { background: var(--ok-soft); } .state.bad { background: var(--bad-soft); } .state.warn { background: var(--warn-soft); }
+.state b { font-family: var(--font-display); font-size: 19px; }
+
+.ctl { display: grid; gap: 12px; }
+.ctl label { display: grid; gap: 4px; font-size: 13.5px; color: var(--muted); }
+.ctl input { font: 500 15px var(--font-mono); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.kv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; font-size: 14.5px; align-items: baseline; }
+.kv b { font: 700 15px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.list { display: grid; gap: 6px; grid-template-columns: minmax(0, 1fr); }
+.item { display: grid; grid-template-columns: 130px minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 14.5px; }
+@media (max-width: 760px) { .item { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+.item code { overflow-wrap: anywhere; }
+.lanes { display: grid; gap: 8px; }
+.lane { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 10px; align-items: center; font-size: 13.5px; }
+.lane .track { display: flex; gap: 4px; flex-wrap: wrap; }
+.lane .track span { font: 600 11.5px var(--font-mono); padding: 5px 8px; border-radius: 6px; background: var(--sunken); }
+.lane .track span.w { background: var(--warn-soft); color: var(--warn); }
+.lane .track span.bad { background: var(--bad-soft); color: var(--bad); }
+.lane .track span.ok { background: var(--ok-soft); color: var(--ok); }
+dl.terms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+@media (max-width: 760px) { dl.terms { grid-template-columns: minmax(0, 1fr); } }
+dl.terms div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+dt { font: 700 13.5px var(--font-mono); } dd { margin: 4px 0 0; font-size: 14.5px; color: var(--muted); }
+.cmds { display: grid; gap: 6px; grid-template-columns: minmax(0, 1fr); }
+.cmd { display: flex; gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 8px 14px; min-width: 0; }
+.cmd code { flex: 1; overflow-x: auto; white-space: nowrap; }
+.cmd button { font: 600 12px var(--font-mono); border: 1px solid var(--line); background: var(--sunken); color: var(--ink); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+footer { padding-top: 48px; font-size: 14px; color: var(--muted); }
+.bk { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.bk button { font: 600 13px var(--font-mono); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.fsm { display: flex; gap: 8px; flex-wrap: wrap; }
+.fsm span { font: 700 13px var(--font-mono); padding: 8px 14px; border-radius: 999px; border: 1px dashed var(--line); color: var(--muted); }
+.fsm span.on.closed { background: var(--ok-soft); color: var(--ok); border-style: solid; border-color: var(--ok); }
+.fsm span.on.open { background: var(--bad-soft); color: var(--bad); border-style: solid; border-color: var(--bad); }
+.fsm span.on.half { background: var(--warn-soft); color: var(--warn); border-style: solid; border-color: var(--warn); }
+.log { font: 400 12.5px/1.6 var(--font-mono); background: var(--sunken); border-radius: 8px; padding: 10px 12px; max-height: 190px; overflow-y: auto; margin: 0; white-space: pre-wrap; }
+.switch { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; }
+.gh { font: 400 13px/1.7 var(--font-mono); background: var(--sunken); border-radius: 8px; padding: 10px 12px; margin: 0; white-space: pre-wrap; }
+.gh .k { color: var(--accent); font-weight: 700; }
+.gh .s { color: var(--ok); }
+table.cmp { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.cmp th, table.cmp td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.cmp th { font: 600 12px var(--font-mono); color: var(--muted); }
+.tscroll { overflow-x: auto; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+</style>
+</head>
+<body data-lang="ru">
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">java-testing · REST Assured · WireMock · Cucumber · Pact JVM</span>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" id="lang-ru" data-l="ru" aria-pressed="true">RU</button>
+      <button type="button" id="lang-en" data-l="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 lang="ru">Тесты на Java: библиотека</h1>
+    <h1 lang="en">Testing in Java: a library</h1>
+    <p class="lead" lang="ru">Свой Library API на встроенном HTTP-сервере JDK, без фреймворков, и четыре слоя тестов: REST Assured, WireMock вместо внешнего каталога, Cucumber для правил выдачи книг и Pact между веб-клиентом и API.</p>
+    <p class="lead" lang="en">A Library API of our own on the JDK's built-in HTTP server, no framework, and four layers of tests: REST Assured, WireMock in place of the external catalogue, Cucumber for the lending rules, and Pact between the web client and the API.</p>
+    <div class="facts">
+      <span><b>89</b><span lang="ru">тестов за ~15 с</span><span lang="en">tests in ~15 s</span></span>
+      <span><b>88 %</b><span lang="ru">покрытие строк (JaCoCo)</span><span lang="en">line coverage (JaCoCo)</span></span>
+      <span><b>14/14</b><span lang="ru">посаженных багов пойманы</span><span lang="en">planted bugs caught</span></span>
+    </div>
+  </section>
+
+  <section class="station" aria-labelledby="p1">
+    <header>
+      <span class="num">01</span>
+      <h2 id="p1" lang="ru">Штраф: где проходят границы</h2><h2 lang="en">Fines: where the boundaries are</h2>
+      <p class="muted" lang="ru">Книга на 14 дней, дальше 0.25 в день, но не больше 10.00. Двигайте ползунок — точки, отмеченные тегом, есть в таблице параметризованного теста. Мутанты M1–M3 ломают именно эти границы.</p>
+      <p class="muted" lang="en">A book for 14 days, then 0.25 a day, at most 10.00. Move the slider: the tagged points are rows of the parameterized test. Mutants M1–M3 break exactly these boundaries.</p>
+    </header>
+    <div class="two">
+      <div class="panel ctl">
+        <label for="days"><span lang="ru">Дней книга у читателя</span><span lang="en">Days the member kept the book</span><input type="range" id="days" min="0" max="70" value="15"></label>
+        <div class="chips" id="pts" role="group" aria-label="Test points"></div>
+      </div>
+      <div class="panel kv" id="fine" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="station" aria-labelledby="p2">
+    <header>
+      <span class="num">02</span>
+      <h2 id="p2" lang="ru">WireMock: каталог, который подводит</h2><h2 lang="en">WireMock: a catalogue that lets you down</h2>
+      <p class="muted" lang="ru">Каждый тест проверяет две вещи: что ответила библиотека и сколько раз она позвонила в каталог. Выберите поведение каталога.</p>
+      <p class="muted" lang="en">Each test checks two things: what the library answered and how many times it called the catalogue. Pick how the catalogue behaves.</p>
+    </header>
+    <div class="chips" id="wm-chips" role="group" aria-label="Catalogue"></div>
+    <div class="two">
+      <div class="panel"><div class="lanes" id="wm-lanes"></div></div>
+      <div class="panel" id="wm-out" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="station" aria-labelledby="p3">
+    <header>
+      <span class="num">03</span>
+      <h2 id="p3" lang="ru">Cucumber: правило словами библиотеки</h2><h2 lang="en">Cucumber: the rule in the library's words</h2>
+      <p class="muted" lang="ru">Слева сценарий, который может прочитать библиотекарь, справа шаги на Java, которые его выполняют. Имена вроде «Ann» живут только внутри сценария.</p>
+      <p class="muted" lang="en">On the left, a scenario a librarian can read; on the right, the Java steps that run it. Names like "Ann" live only inside a scenario.</p>
+    </header>
+    <div class="two">
+      <pre class="gh" id="gherkin"></pre>
+      <pre class="code" id="steps"></pre>
+    </div>
+  </section>
+
+  <section class="station" aria-labelledby="p4">
+    <header>
+      <span class="num">04</span>
+      <h2 id="p4" lang="ru">Pact: клиент записывает, сервер подтверждает</h2><h2 lang="en">Pact: the client records, the server confirms</h2>
+      <p class="muted" lang="ru">Веб-клиент фиксирует только те поля, которые читает. Тест провайдера для каждого взаимодействия поднимает свежую библиотеку, выполняет @State и повторяет запрос на настоящем сервере.</p>
+      <p class="muted" lang="en">The web client records only the fields it reads. The provider test starts a fresh library for each interaction, runs the @State method and replays the request against the real server.</p>
+    </header>
+    <div class="panel tscroll"><table class="cmp" id="pact"></table></div>
+  </section>
+
+  <section class="station" aria-labelledby="p5">
+    <header>
+      <span class="num">05</span>
+      <h2 id="p5" lang="ru">Посаженные баги</h2><h2 lang="en">Planted bugs</h2>
+      <p class="muted" lang="ru"><code>python3 scripts/mutants.py</code> сажает по одному багу и гоняет весь набор — отдельная задача в CI.</p>
+      <p class="muted" lang="en"><code>python3 scripts/mutants.py</code> plants one bug at a time and runs the whole suite, as a separate CI job.</p>
+    </header>
+    <div class="list" id="mut"></div>
+    <div class="cmds" id="cmds"></div>
+  </section>
+
+  <footer>
+    <span lang="ru">Код: <a href="https://github.com/NailKarimov/java-testing">github.com/NailKarimov/java-testing</a> · текстом: <code>docs/java.md</code> · <a href="./">Allure</a> · <a href="cucumber/">Cucumber</a> · <a href="coverage/">JaCoCo</a>.</span>
+    <span lang="en">Code: <a href="https://github.com/NailKarimov/java-testing">github.com/NailKarimov/java-testing</a> · as text: <code>docs/java.md</code> · <a href="./">Allure</a> · <a href="cucumber/">Cucumber</a> · <a href="coverage/">JaCoCo</a>.</span>
+  </footer>
+</div>
+
+<script>
+const S = { lang: 'ru', wm: 'flaky' };
+const L = (ru, en) => (S.lang === 'ru' ? ru : en);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const $ = (id) => document.getElementById(id);
+function chips(id, items, cur, key) {
+  $(id).innerHTML = items.map(([v, ru, en]) => `<button type="button" data-v="${v}" aria-pressed="${String(v) === String(cur)}">${L(ru, en)}</button>`).join('');
+  $(id).onclick = (e) => { const b = e.target.closest('button'); if (!b) return; S[key] = b.dataset.v; renderAll(); };
+}
+
+/* 01 */
+const POINTS = [0, 14, 15, 16, 53, 54, 55];
+const cents = (d) => Math.min(1000, 25 * Math.max(0, d - 14));
+const money = (c) => (c / 100).toFixed(2);
+function renderFine() {
+  const d = Number($('days').value);
+  $('pts').innerHTML = POINTS.map((p) => `<button type="button" data-p="${p}" aria-pressed="${p === d}">${p}</button>`).join('');
+  const due = new Date(Date.UTC(2026, 9, 15)), back = new Date(Date.UTC(2026, 9, 1 + d));
+  const late = Math.max(0, d - 14);
+  const note = d < 14 ? L('Вернул раньше срока.', 'Returned early.') : d === 14 ? L('Ровно в день сдачи — штрафа нет. Граница M3.', 'On the due date: no fine. The M3 boundary.') : d === 15 ? L('Первый день просрочки.', 'The first day late.') : cents(d) === 1000 ? (late === 40 ? L('Ровно потолок: 40 × 0.25 = 10.00. Без потолка (M2) здесь было бы так же — мутант ловит 55-й день.', 'Exactly the cap: 40 × 0.25 = 10.00. Without a cap (M2) this would be the same; the mutant is caught on day 55.') : L('Потолок 10.00 держится. Здесь ловится M2.', 'The 10.00 cap holds. M2 is caught here.')) : '';
+  $('fine').innerHTML = `<span>${L('Срок сдачи', 'Due')}</span><b>${due.toISOString().slice(0, 10)}</b><span>${L('Вернул', 'Returned')}</span><b>${back.toISOString().slice(0, 10)}</b><span>${L('Дней просрочки', 'Days late')}</span><b>${late}</b><span>${L('Штраф', 'Fine')}</span><b>${money(cents(d))}</b>` +
+    `<span class="muted" style="grid-column:1/-1">${note} ${POINTS.includes(d) ? `<span class="tag ac">${L('точка теста', 'test point')}</span>` : ''}</span>`;
+}
+$('days').addEventListener('input', renderFine);
+$('pts').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (!b) return; $('days').value = b.dataset.p; renderFine(); });
+
+/* 02 */
+const WM = {
+  unknown: { n: ['404 Not Found', '404 Not Found'], calls: [['404', 'w']], out: [422, 'UNKNOWN_ISBN'], note: ['Ошибка пользователя: такой книги нет. Повторять незачем.', "The user's problem: no such book. No point retrying."] },
+  flaky: { n: ['500, потом 200', '500, then 200'], calls: [['500', 'bad'], ['200', 'ok']], out: [201, ''], note: ['Повтор спас запрос.', 'The retry saved the request.'] },
+  down: { n: ['500 всегда', '500 always'], calls: [['500', 'bad'], ['500', 'bad']], out: [503, 'CATALOGUE_UNAVAILABLE'], note: ['Ровно два звонка, книга не сохранена.', 'Exactly two calls, nothing stored.'] },
+  slow: { n: ['Задержка 1.5 с', '1.5 s delay'], calls: [['300 ms timeout', 'bad'], ['300 ms timeout', 'bad']], out: [503, 'CATALOGUE_UNAVAILABLE'], note: ['Ответ меньше чем за 1.4 с, а не через полторы секунды на каждую попытку. Мутант M12 без таймаута ловится здесь.', 'An answer in under 1.4 s, not 1.5 s per attempt. Mutant M12 without a timeout is caught here.'] },
+  reset: { n: ['Обрыв, потом 200', 'Reset, then 200'], calls: [['reset', 'bad'], ['200', 'ok']], out: [201, ''], note: ['Сетевая ошибка — повод повторить.', 'A network error is worth a retry.'] },
+  html: { n: ['HTML вместо JSON', 'HTML instead of JSON'], calls: [['200 <html>', 'w']], out: [502, 'CATALOGUE_BAD_RESPONSE'], note: ['Виноват каталог, а не пользователь, поэтому 502. Повтор не поможет — не повторяем.', "The catalogue's fault, not the user's, hence 502. A retry would not help, so none."] },
+  cached: { n: ['Книга уже на полке', 'Already on the shelf'], calls: [], out: [201, ''], note: ['Ноль звонков: копии добавляются без каталога.', 'Zero calls: copies are added without the catalogue.'] },
+  invalid: { n: ['Неверная контрольная цифра', 'Wrong check digit'], calls: [], out: [400, 'INVALID_ISBN'], note: ['Ноль звонков. Мутант M9 отключает проверку: API всё равно отвечает ошибкой, но позже — и только счётчик звонков WireMock показывает, что мусор ушёл во внешний сервис.', 'Zero calls. Mutant M9 switches the check off: the API still answers with an error, but later, and only the WireMock call count shows that junk reached the external service.'] },
+};
+function renderWm() {
+  chips('wm-chips', Object.entries(WM).map(([k, w]) => [k, w.n[0], w.n[1]]), S.wm, 'wm');
+  const w = WM[S.wm];
+  $('wm-lanes').innerHTML = (w.calls.length ? w.calls.map((c, i) => `<div class="lane"><b>${L('звонок', 'call')} ${i + 1}</b><div class="track"><span class="${c[1]}">${esc(c[0])}</span></div></div>`).join('') : `<p class="muted">${L('Каталог не вызывался.', 'The catalogue was not called.')}</p>`);
+  const ok = w.out[0] < 300;
+  $('wm-out').innerHTML = `<div class="state ${ok ? 'ok' : w.out[0] >= 500 ? 'warn' : 'bad'}"><b>${w.out[0]} ${esc(w.out[1])}</b><span>${L('звонков в каталог', 'catalogue calls')}: ${w.calls.length}</span></div><p class="muted">${L(...w.note)}</p>`;
+}
+
+/* 03 */
+const GH = `<span class="k">Scenario Outline:</span> Fines for late returns
+  <span class="k">Given</span> Ann has borrowed <span class="s">"The Master and Margarita"</span>
+  <span class="k">And</span> &lt;days&gt; days have passed
+  <span class="k">When</span> Ann returns <span class="s">"The Master and Margarita"</span>
+  <span class="k">Then</span> the fine is &lt;fine&gt;
+  <span class="k">And</span> Ann owes &lt;fine&gt;
+
+  <span class="k">Examples:</span>
+    | days | fine  |
+    | 14   | 0.00  |
+    | 15   | 0.25  |
+    | 30   | 4.00  |
+    | 54   | 10.00 |
+    | 90   | 10.00 |`;
+const STEPS = `@Given("{word} has borrowed {string}")
+public void hasBorrowed(String name, String title) {
+  borrows(name, title);
+  assertThat(last.statusCode(), equalTo(201));
+}
+
+@And("{int} days have passed")
+public void daysPass(int days) {
+  lib.clock.plusDays(days);   // no waiting
+}
+
+@Then("the fine is {bigdecimal}")
+public void fine(BigDecimal amount) {
+  assertThat(new BigDecimal(last.jsonPath().getString("fine")),
+      comparesEqualTo(amount));  // 10.0 == 10.00
+}`;
+function renderBdd() { $('gherkin').innerHTML = GH; $('steps').textContent = STEPS; }
+
+/* 04 */
+function renderPact() {
+  const rows = [
+    ['book 9780140449136 has 2 copies on the shelf', 'GET /books/9780140449136', '200 · isbn, title (type), available (integer)'],
+    ['no book 9790000000001', 'GET /books/9790000000001', '404 · code = BOOK_NOT_FOUND'],
+    ['member 1 exists and book … has a free copy', 'POST /loans', '201 · id (integer), due (\\d{4}-\\d{2}-\\d{2})'],
+    ['member 1 already has 3 books on loan', 'POST /loans', '409 · code = LOAN_LIMIT'],
+  ];
+  $('pact').innerHTML = `<thead><tr><th>@State</th><th>${L('Запрос', 'Request')}</th><th>${L('Клиенту нужно', 'The client needs')}</th></tr></thead><tbody>` + rows.map((r) => `<tr><td><code>${esc(r[0])}</code></td><td><code>${esc(r[1])}</code></td><td>${esc(r[2])}</td></tr>`).join('') + '</tbody>';
+}
+
+const MUT = [
+  ['M1', ['выдача на 15 дней', 'loans last 15 days']], ['M2', ['нет потолка штрафа', 'no cap on fines']], ['M3', ['просрочка считается на день раньше', 'late days counted one too early']],
+  ['M4', ['ровно 5.00 уже блокирует', 'exactly 5.00 already blocks']], ['M5', ['можно взять четвёртую книгу', 'a fourth book allowed']], ['M7', ['книгу можно вернуть дважды', 'a loan can be returned twice']],
+  ['M9', ['контрольная цифра ISBN не проверяется', 'ISBN check digit not verified']], ['M10', ['нет повтора', 'no retry']], ['M12', ['нет таймаута', 'no timeout']], ['M14', ['дубли ключей в JSON проходят', 'duplicate JSON keys accepted']],
+];
+function renderMut() { $('mut').innerHTML = MUT.map((m) => `<div class="item"><b>${m[0]}</b><span>${esc(L(...m[1]))}</span><span class="muted">${L('пойман', 'caught')}</span></div>`).join('') + `<p class="muted">${L('И ещё четыре — 14 из 14. Результат каждого прогона публикуется на Pages: mutants/result.md.', 'And four more: 14 of 14. Each run publishes its result on Pages: mutants/result.md.')}</p>`; }
+const CMDS = ['mvn test -Dtest=LibraryWebConsumerPactTest', 'mvn test', 'python3 scripts/mutants.py'];
+function renderCmds() { $('cmds').innerHTML = CMDS.map((c, i) => `<div class="cmd"><code id="cmd-${i}">${esc(c)}</code><button type="button" data-c="${i}">${L('Копировать', 'Copy')}</button></div>`).join(''); }
+$('cmds').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-c]'); if (!b) return;
+  const done = () => { b.textContent = L('Скопировано', 'Copied'); setTimeout(() => (b.textContent = L('Копировать', 'Copy')), 1500); };
+  const fallback = () => { const r = document.createRange(); r.selectNodeContents($('cmd-' + b.dataset.c)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+  try { navigator.clipboard.writeText(CMDS[+b.dataset.c]).then(done, fallback); } catch (err) { fallback(); }
+});
+
+function renderAll() { renderFine(); renderWm(); renderBdd(); renderPact(); renderMut(); renderCmds(); }
+function setLang(l) {
+  S.lang = l; document.body.dataset.lang = l; document.documentElement.lang = l;
+  $('lang-ru').setAttribute('aria-pressed', l === 'ru');
+  $('lang-en').setAttribute('aria-pressed', l === 'en');
+  try { localStorage.setItem('java-lang', l); } catch (e) {}
+  renderAll();
+}
+document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.l)));
+let start = document.documentElement.dataset.defaultLang || 'ru';
+try { start = localStorage.getItem('java-lang') || start; } catch (e) {}
+setLang(start);
+</script>
+</body>
+</html>

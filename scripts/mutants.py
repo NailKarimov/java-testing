@@ -43,8 +43,8 @@ def main(selected: set[str]) -> int:
         finally:
             path.write_text(original)
         caught = r.returncode != 0
-        failed = [ln.strip() for ln in r.stdout.splitlines() if "<<< FAIL" in ln or "ERROR]   " in ln][:1]
-        print(f"| {mid} | {what} | {'caught' if caught else '**SURVIVED**'} | {failed[0][:110] if failed else ''} |", flush=True)
+        classes = sorted({ln.rsplit(".", 1)[-1] for ln in r.stdout.splitlines() if "<<< FAILURE! -- in " in ln})
+        print(f"| {mid} | {what} | {'caught' if caught else '**SURVIVED**'} | {', '.join(classes)} |", flush=True)
         if not caught:
             survived.append(mid)
     print(f"\n{len(survived)} survived: {' '.join(survived)}" if survived else "\nAll mutants caught.")
@@ -52,5 +52,5 @@ def main(selected: set[str]) -> int:
 
 
 if __name__ == "__main__":
-    print("| # | Bug | Result | First failure |\n| --- | --- | --- | --- |")
+    print("| # | Bug | Result | Failed test classes |\n| --- | --- | --- | --- |")
     sys.exit(main(set(sys.argv[1:])))
