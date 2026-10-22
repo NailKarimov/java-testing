@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: dev.nailkarimov.library.api.BooksApiTest
 -------------------------------------------------------------------------------
-Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.414 s -- in dev.nailkarimov.library.api.BooksApiTest
+Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.079 s -- in dev.nailkarimov.library.api.BooksApiTest
