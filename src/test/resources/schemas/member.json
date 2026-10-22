@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["id", "name", "email", "loans", "fines"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "email": { "type": "string", "pattern": "^[^A-Z]+@[^A-Z]+$" },
+    "loans": { "type": "array" },
+    "fines": { "type": "number", "minimum": 0 }
+  }
+}

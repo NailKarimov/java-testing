@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["isbn", "title", "authors", "copies", "available"],
+  "additionalProperties": false,
+  "properties": {
+    "isbn": { "type": "string", "pattern": "^97[89]\\d{10}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "authors": { "type": "array", "items": { "type": "string" } },
+    "copies": { "type": "integer", "minimum": 1, "maximum": 50 },
+    "available": { "type": "integer", "minimum": 0 }
+  }
+}

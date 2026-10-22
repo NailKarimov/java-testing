@@ -5,17 +5,11 @@ on:
     branches: [main]
   pull_request:
   schedule:
-    - cron: '0 3 * * *' # nightly, 03:00 UTC
+    - cron: '0 5 * * *' # nightly, 05:00 UTC
   workflow_dispatch:
-    inputs:
-      project:
-        description: 'Which tests to run'
-        type: choice
-        options: [all, ui, api, smoke]
-        default: all
 
 permissions:
-  contents: write # publish the Allure report to the gh-pages branch
+  contents: write # publish the reports to the gh-pages branch
 
 concurrency:
   group: tests-${{ github.ref }}
@@ -24,44 +18,57 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - uses: actions/setup-java@v5 # Allure CLI needs Java
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
+          cache: maven
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Lint and type check
+      - name: Compile
         run: |
-          npm run lint
-          npm run format:check
-          npm run typecheck
+          mkdir -p site/diag
+          mvn -B -ntp test-compile 2>&1 | tee site/diag/compile.log
+          exit "${PIPESTATUS[0]}"
 
-      - name: Run tests
+      - name: Pact consumer (writes target/pacts)
+        id: consumer
+        continue-on-error: true
+        run: |
+          mvn -B -ntp test -Dtest='LibraryWebConsumerPactTest' -Djacoco.skip=true 2>&1 | tee site/diag/consumer.log
+          exit "${PIPESTATUS[0]}"
+
+      - name: All tests (API, WireMock, Cucumber, Pact provider)
         id: tests
         continue-on-error: true
-        env:
-          PROJECT: ${{ github.event.inputs.project || 'all' }}
         run: |
-          case "$PROJECT" in
-            ui)    npm run test:ui ;;
-            api)   npm run test:api ;;
-            smoke) npm run test:smoke ;;
-            *)     npm test ;;
-          esac
+          mvn -B -ntp test 2>&1 | tee site/diag/test.log
+          exit "${PIPESTATUS[0]}"
+
+      - name: Summary
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import glob, xml.etree.ElementTree as ET
+          rows, t = [], dict(tests=0, failures=0, errors=0, skipped=0)
+          for f in sorted(glob.glob('target/surefire-reports/TEST-*.xml')):
+              s = ET.parse(f).getroot()
+              n = {k: int(s.get(k, 0)) for k in t}
+              for k in t: t[k] += n[k]
+              rows.append(f"| {s.get('name').split('.')[-1]} | {n['tests']} | {n['failures'] + n['errors']} |")
+          print('### Tests\n\n| Class | Tests | Failed |\n| --- | ---: | ---: |')
+          print('\n'.join(rows))
+          print(f"\n**{t['tests']} tests, {t['failures'] + t['errors']} failed, {t['skipped']} skipped**")
+          PY
+          cp target/surefire-reports/*.txt site/diag/ 2>/dev/null || true
+
+      - uses: actions/setup-node@v4
+        if: always()
+        with:
+          node-version: 22
 
       - name: Restore Allure history
         if: always()
@@ -69,15 +76,23 @@ jobs:
           git fetch origin gh-pages --depth=1 || exit 0
           git worktree add gh-pages-old origin/gh-pages || exit 0
           if [ -d gh-pages-old/history ]; then
-            mkdir -p allure-results/history
-            cp -r gh-pages-old/history/. allure-results/history/
+            mkdir -p target/allure-results/history
+            cp -r gh-pages-old/history/. target/allure-results/history/
           fi
 
-      - name: Generate Allure report
+      - name: Build the site
         if: always()
-        run: npm run allure:generate
+        run: |
+          printf 'Java=%s\nRun=GitHub Actions\nCommit=%s\n' "$(java -version 2>&1 | head -1)" "${GITHUB_SHA::7}" > target/allure-results/environment.properties || true
+          npx --yes allure-commandline@2.46.1 generate target/allure-results -o allure-report --clean || mkdir -p allure-report
+          cp -r site/diag allure-report/diag
+          if [ -d target/site/jacoco ]; then cp -r target/site/jacoco allure-report/coverage; fi
+          if [ -d target/cucumber ]; then cp -r target/cucumber allure-report/cucumber; fi
+          if [ -d target/pacts ]; then cp -r target/pacts allure-report/pacts; fi
+          for f in docs/*.html; do if [ -f "$f" ]; then cp "$f" allure-report/; fi; done
+          if [ -d gh-pages-old/mutants ]; then cp -r gh-pages-old/mutants allure-report/; fi
 
-      - name: Publish Allure report to GitHub Pages
+      - name: Publish to GitHub Pages
         if: always() && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -85,14 +100,34 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-report
 
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report
-          retention-days: 14
-
       - name: Fail the job if tests failed
-        if: steps.tests.outcome == 'failure'
+        if: steps.tests.outcome == 'failure' || steps.consumer.outcome == 'failure'
         run: exit 1
+
+  mutants:
+    if: github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Warm up (dependencies and the pact file)
+        run: mvn -B -ntp -q test -Dtest='LibraryWebConsumerPactTest'
+      - name: Every planted bug must fail the suite
+        run: |
+          mkdir -p out/mutants
+          python3 scripts/mutants.py | tee out/mutants/result.md | tee -a "$GITHUB_STEP_SUMMARY"
+          exit "${PIPESTATUS[0]}"
+      - name: Publish the result next to the reports
+        if: always() && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: out
+          keep_files: true
