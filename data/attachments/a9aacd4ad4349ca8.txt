@@ -1,0 +1,18 @@
+POST https://jsonplaceholder.typicode.com/posts
+
+Request body:
+{
+  "userId": 7,
+  "title": "Corporis creo somnus molestiae clam pecto tantum.",
+  "body": "Vulnero exercitationem volup curis. Velut teres nesciunt natus virgo. Bonus sufficio assentator venio adulatio."
+}
+
+Status: 201
+
+Response body:
+{
+  "userId": 7,
+  "title": "Corporis creo somnus molestiae clam pecto tantum.",
+  "body": "Vulnero exercitationem volup curis. Velut teres nesciunt natus virgo. Bonus sufficio assentator venio adulatio.",
+  "id": 101
+}
