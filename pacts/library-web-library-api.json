@@ -1,0 +1,243 @@
+{
+  "consumer": {
+    "name": "library-web"
+  },
+  "interactions": [
+    {
+      "description": "a request for a book on the shelf",
+      "providerStates": [
+        {
+          "name": "book 9780140449136 has 2 copies on the shelf"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/books/9780140449136"
+      },
+      "response": {
+        "body": {
+          "available": 2,
+          "isbn": "9780140449136",
+          "title": "War and Peace"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.available": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.title": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "member 1 tries to borrow a fourth book",
+      "providerStates": [
+        {
+          "name": "member 1 already has 3 books on loan"
+        }
+      ],
+      "request": {
+        "body": {
+          "isbn": "9780140449136",
+          "memberId": 1
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.memberId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/loans"
+      },
+      "response": {
+        "body": {
+          "code": "LOAN_LIMIT"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 409
+      }
+    },
+    {
+      "description": "member 1 borrows a free book",
+      "providerStates": [
+        {
+          "name": "member 1 exists and book 9780140449136 has a free copy"
+        }
+      ],
+      "request": {
+        "body": {
+          "isbn": "9780140449136",
+          "memberId": 1
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.memberId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/loans"
+      },
+      "response": {
+        "body": {
+          "due": "2026-11-05",
+          "id": 1
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.due": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      }
+    },
+    {
+      "description": "a request for a book the library does not have",
+      "providerStates": [
+        {
+          "name": "no book 9790000000001"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/books/9790000000001"
+      },
+      "response": {
+        "body": {
+          "code": "BOOK_NOT_FOUND",
+          "message": "no book"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.17"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "library-api"
+  }
+}

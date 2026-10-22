@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Library.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Library API tests in Java</a> &gt; <a href="index.source.html" class="el_package">dev.nailkarimov.library</a> &gt; <span class="el_source">Library.java</span></div><h1>Library.java</h1><pre class="source lang-java linenums">package dev.nailkarimov.library;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
+/**
+ * The lending rules. All state is in memory and every public method is synchronized: one library, one lock.
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;A loan lasts {@value #LOAN_DAYS} days; a member holds at most {@value #LOAN_LIMIT} books at once and never two
+ *       copies of the same title.
+ *   &lt;li&gt;Late returns cost 0.25 per day, at most 10.00 per loan.
+ *   &lt;li&gt;A member who owes more than 5.00 cannot borrow until they pay.
+ * &lt;/ul&gt;
+ */
+public final class Library {
+  public static final int LOAN_DAYS = 14;
+  public static final int LOAN_LIMIT = 3;
+<span class="fc" id="L28">  public static final BigDecimal FINE_PER_DAY = new BigDecimal(&quot;0.25&quot;);</span>
+<span class="fc" id="L29">  public static final BigDecimal FINE_CAP = new BigDecimal(&quot;10.00&quot;);</span>
+<span class="fc" id="L30">  public static final BigDecimal BLOCK_ABOVE = new BigDecimal(&quot;5.00&quot;);</span>
+<span class="fc" id="L31">  private static final Pattern EMAIL = Pattern.compile(&quot;[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+&quot;);</span>
+
+<span class="fc" id="L33">  private record Member(long id, String name, String email) {}</span>
+
+  private static final class Book {
+    final String isbn;
+    final String title;
+    final List&lt;String&gt; authors;
+    int copies;
+
+<span class="fc" id="L41">    Book(String isbn, String title, List&lt;String&gt; authors, int copies) {</span>
+<span class="fc" id="L42">      this.isbn = isbn;</span>
+<span class="fc" id="L43">      this.title = title;</span>
+<span class="fc" id="L44">      this.authors = authors;</span>
+<span class="fc" id="L45">      this.copies = copies;</span>
+<span class="fc" id="L46">    }</span>
+  }
+
+  private static final class Loan {
+    final long id;
+    final long memberId;
+    final String isbn;
+    final LocalDate borrowed;
+    final LocalDate due;
+    LocalDate returned;
+<span class="fc" id="L56">    BigDecimal fine = BigDecimal.ZERO.setScale(2);</span>
+
+<span class="fc" id="L58">    Loan(long id, long memberId, String isbn, LocalDate borrowed) {</span>
+<span class="fc" id="L59">      this.id = id;</span>
+<span class="fc" id="L60">      this.memberId = memberId;</span>
+<span class="fc" id="L61">      this.isbn = isbn;</span>
+<span class="fc" id="L62">      this.borrowed = borrowed;</span>
+<span class="fc" id="L63">      this.due = borrowed.plusDays(LOAN_DAYS);</span>
+<span class="fc" id="L64">    }</span>
+  }
+
+  private final Supplier&lt;LocalDate&gt; today;
+  private final CatalogueClient catalogue;
+<span class="fc" id="L69">  private final Map&lt;Long, Member&gt; members = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L70">  private final Map&lt;Long, BigDecimal&gt; owed = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L71">  private final Map&lt;String, Book&gt; books = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L72">  private final Map&lt;Long, Loan&gt; loans = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L73">  private long nextMember = 1;</span>
+<span class="fc" id="L74">  private long nextLoan = 1;</span>
+
+<span class="fc" id="L76">  public Library(Supplier&lt;LocalDate&gt; today, CatalogueClient catalogue) {</span>
+<span class="fc" id="L77">    this.today = today;</span>
+<span class="fc" id="L78">    this.catalogue = catalogue;</span>
+<span class="fc" id="L79">  }</span>
+
+  // ---- members
+
+  public synchronized Map&lt;String, Object&gt; addMember(Map&lt;String, Object&gt; in) {
+<span class="fc" id="L84">    String name = text(in, &quot;name&quot;, 1, 80);</span>
+<span class="fc" id="L85">    String email = text(in, &quot;email&quot;, 3, 254).toLowerCase(Locale.ROOT);</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (!EMAIL.matcher(email).matches()) {</span>
+<span class="fc" id="L87">      throw new ApiException(400, &quot;VALIDATION&quot;, &quot;email is not valid&quot;);</span>
+    }
+<span class="fc bfc" id="L89" title="All 2 branches covered.">    for (Member m : members.values()) {</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">      if (m.email.equals(email)) {</span>
+<span class="fc" id="L91">        throw new ApiException(409, &quot;EMAIL_TAKEN&quot;, &quot;a member with this email exists&quot;);</span>
+      }
+<span class="fc" id="L93">    }</span>
+<span class="fc" id="L94">    Member m = new Member(nextMember++, name.strip(), email);</span>
+<span class="fc" id="L95">    members.put(m.id, m);</span>
+<span class="fc" id="L96">    owed.put(m.id, BigDecimal.ZERO.setScale(2));</span>
+<span class="fc" id="L97">    return member(m.id);</span>
+  }
+
+  public synchronized Map&lt;String, Object&gt; member(long id) {
+<span class="fc" id="L101">    Member m = members.get(id);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">    if (m == null) {</span>
+<span class="fc" id="L103">      throw new ApiException(404, &quot;MEMBER_NOT_FOUND&quot;, &quot;no member &quot; + id);</span>
+    }
+<span class="fc" id="L105">    List&lt;Object&gt; active = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">    for (Loan l : loans.values()) {</span>
+<span class="fc bfc" id="L107" title="All 4 branches covered.">      if (l.memberId == id &amp;&amp; l.returned == null) {</span>
+<span class="fc" id="L108">        active.add(loanView(l));</span>
+      }
+<span class="fc" id="L110">    }</span>
+<span class="fc" id="L111">    Map&lt;String, Object&gt; out = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L112">    out.put(&quot;id&quot;, m.id);</span>
+<span class="fc" id="L113">    out.put(&quot;name&quot;, m.name);</span>
+<span class="fc" id="L114">    out.put(&quot;email&quot;, m.email);</span>
+<span class="fc" id="L115">    out.put(&quot;loans&quot;, active);</span>
+<span class="fc" id="L116">    out.put(&quot;fines&quot;, owed.get(id));</span>
+<span class="fc" id="L117">    return out;</span>
+  }
+
+  public synchronized Map&lt;String, Object&gt; pay(long memberId, Map&lt;String, Object&gt; in) {
+<span class="fc" id="L121">    member(memberId);</span>
+<span class="fc" id="L122">    BigDecimal amount = money(in.get(&quot;amount&quot;));</span>
+<span class="fc" id="L123">    BigDecimal due = owed.get(memberId);</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">    if (amount.compareTo(due) &gt; 0) {</span>
+<span class="fc" id="L125">      throw new ApiException(400, &quot;VALIDATION&quot;, &quot;amount is more than the &quot; + due + &quot; owed&quot;);</span>
+    }
+<span class="fc" id="L127">    owed.put(memberId, due.subtract(amount));</span>
+<span class="fc" id="L128">    return member(memberId);</span>
+  }
+
+  // ---- books
+
+  /** Adds copies of a title. A new ISBN is looked up in the catalogue first (outside the lock would be nicer). */
+  public synchronized Map&lt;String, Object&gt; addBook(Map&lt;String, Object&gt; in) {
+<span class="fc" id="L135">    Object rawIsbn = in.get(&quot;isbn&quot;);</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">    String isbn = Isbn.normalize(rawIsbn instanceof String s ? s : null);</span>
+<span class="fc" id="L137">    int copies = integer(in, &quot;copies&quot;, 1, 20);</span>
+<span class="fc" id="L138">    Book b = books.get(isbn);</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (b != null) {</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">      if (b.copies + copies &gt; 50) {</span>
+<span class="nc" id="L141">        throw new ApiException(400, &quot;VALIDATION&quot;, &quot;a title has at most 50 copies&quot;);</span>
+      }
+<span class="fc" id="L143">      b.copies += copies;</span>
+    } else {
+<span class="fc" id="L145">      CatalogueClient.Entry e = catalogue.lookup(isbn);</span>
+<span class="fc" id="L146">      b = new Book(isbn, e.title(), e.authors(), copies);</span>
+<span class="fc" id="L147">      books.put(isbn, b);</span>
+    }
+<span class="fc" id="L149">    return book(isbn);</span>
+  }
+
+  public synchronized Map&lt;String, Object&gt; book(String rawIsbn) {
+<span class="fc" id="L153">    String isbn = Isbn.normalize(rawIsbn);</span>
+<span class="fc" id="L154">    Book b = books.get(isbn);</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">    if (b == null) {</span>
+<span class="fc" id="L156">      throw new ApiException(404, &quot;BOOK_NOT_FOUND&quot;, &quot;no book &quot; + isbn);</span>
+    }
+<span class="fc" id="L158">    Map&lt;String, Object&gt; out = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L159">    out.put(&quot;isbn&quot;, b.isbn);</span>
+<span class="fc" id="L160">    out.put(&quot;title&quot;, b.title);</span>
+<span class="fc" id="L161">    out.put(&quot;authors&quot;, b.authors);</span>
+<span class="fc" id="L162">    out.put(&quot;copies&quot;, b.copies);</span>
+<span class="fc" id="L163">    out.put(&quot;available&quot;, b.copies - onLoan(isbn));</span>
+<span class="fc" id="L164">    return out;</span>
+  }
+
+  private int onLoan(String isbn) {
+<span class="fc" id="L168">    int n = 0;</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">    for (Loan l : loans.values()) {</span>
+<span class="pc bpc" id="L170" title="1 of 4 branches missed.">      if (l.isbn.equals(isbn) &amp;&amp; l.returned == null) {</span>
+<span class="fc" id="L171">        n++;</span>
+      }
+<span class="fc" id="L173">    }</span>
+<span class="fc" id="L174">    return n;</span>
+  }
+
+  // ---- loans
+
+  public synchronized Map&lt;String, Object&gt; borrow(Map&lt;String, Object&gt; in) {
+<span class="fc" id="L180">    long memberId = integer(in, &quot;memberId&quot;, 1, Integer.MAX_VALUE);</span>
+<span class="fc" id="L181">    Object rawIsbn = in.get(&quot;isbn&quot;);</span>
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">    String isbn = Isbn.normalize(rawIsbn instanceof String s ? s : null);</span>
+<span class="fc" id="L183">    member(memberId);</span>
+<span class="fc" id="L184">    Book b = books.get(isbn);</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">    if (b == null) {</span>
+<span class="fc" id="L186">      throw new ApiException(404, &quot;BOOK_NOT_FOUND&quot;, &quot;no book &quot; + isbn);</span>
+    }
+<span class="fc bfc" id="L188" title="All 2 branches covered.">    if (owed.get(memberId).compareTo(BLOCK_ABOVE) &gt; 0) {</span>
+<span class="fc" id="L189">      throw new ApiException(409, &quot;FINES_UNPAID&quot;, &quot;member owes &quot; + owed.get(memberId));</span>
+    }
+<span class="fc" id="L191">    int active = 0;</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">    for (Loan l : loans.values()) {</span>
+<span class="fc bfc" id="L193" title="All 4 branches covered.">      if (l.memberId == memberId &amp;&amp; l.returned == null) {</span>
+<span class="fc" id="L194">        active++;</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if (l.isbn.equals(isbn)) {</span>
+<span class="fc" id="L196">          throw new ApiException(409, &quot;ALREADY_BORROWED&quot;, &quot;member already has this title&quot;);</span>
+        }
+      }
+<span class="fc" id="L199">    }</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">    if (active &gt;= LOAN_LIMIT) {</span>
+<span class="fc" id="L201">      throw new ApiException(409, &quot;LOAN_LIMIT&quot;, &quot;member already has &quot; + LOAN_LIMIT + &quot; books&quot;);</span>
+    }
+<span class="fc bfc" id="L203" title="All 2 branches covered.">    if (b.copies - onLoan(isbn) &lt;= 0) {</span>
+<span class="fc" id="L204">      throw new ApiException(409, &quot;NO_COPIES&quot;, &quot;no copies available&quot;);</span>
+    }
+<span class="fc" id="L206">    Loan l = new Loan(nextLoan++, memberId, isbn, today.get());</span>
+<span class="fc" id="L207">    loans.put(l.id, l);</span>
+<span class="fc" id="L208">    return loanView(l);</span>
+  }
+
+  public synchronized Map&lt;String, Object&gt; giveBack(long loanId) {
+<span class="fc" id="L212">    Loan l = loans.get(loanId);</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">    if (l == null) {</span>
+<span class="fc" id="L214">      throw new ApiException(404, &quot;LOAN_NOT_FOUND&quot;, &quot;no loan &quot; + loanId);</span>
+    }
+<span class="fc bfc" id="L216" title="All 2 branches covered.">    if (l.returned != null) {</span>
+<span class="fc" id="L217">      throw new ApiException(409, &quot;ALREADY_RETURNED&quot;, &quot;loan was returned on &quot; + l.returned);</span>
+    }
+<span class="fc" id="L219">    l.returned = today.get();</span>
+<span class="fc" id="L220">    l.fine = fineFor(l.due, l.returned);</span>
+<span class="fc" id="L221">    owed.merge(l.memberId, l.fine, BigDecimal::add);</span>
+<span class="fc" id="L222">    return loanView(l);</span>
+  }
+
+  public synchronized Map&lt;String, Object&gt; loan(long loanId) {
+<span class="fc" id="L226">    Loan l = loans.get(loanId);</span>
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">    if (l == null) {</span>
+<span class="nc" id="L228">      throw new ApiException(404, &quot;LOAN_NOT_FOUND&quot;, &quot;no loan &quot; + loanId);</span>
+    }
+<span class="fc" id="L230">    return loanView(l);</span>
+  }
+
+  /** 0.25 per day after the due date, capped at 10.00. */
+  public static BigDecimal fineFor(LocalDate due, LocalDate returned) {
+<span class="fc" id="L235">    long late = Math.max(0, ChronoUnit.DAYS.between(due, returned));</span>
+<span class="fc" id="L236">    BigDecimal fine = FINE_PER_DAY.multiply(BigDecimal.valueOf(late));</span>
+<span class="fc" id="L237">    return fine.min(FINE_CAP).setScale(2, RoundingMode.UNNECESSARY);</span>
+  }
+
+  private Map&lt;String, Object&gt; loanView(Loan l) {
+<span class="fc" id="L241">    Map&lt;String, Object&gt; out = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L242">    out.put(&quot;id&quot;, l.id);</span>
+<span class="fc" id="L243">    out.put(&quot;memberId&quot;, l.memberId);</span>
+<span class="fc" id="L244">    out.put(&quot;isbn&quot;, l.isbn);</span>
+<span class="fc" id="L245">    out.put(&quot;borrowed&quot;, l.borrowed.toString());</span>
+<span class="fc" id="L246">    out.put(&quot;due&quot;, l.due.toString());</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">    out.put(&quot;returned&quot;, l.returned == null ? null : l.returned.toString());</span>
+<span class="fc" id="L248">    out.put(&quot;fine&quot;, l.fine);</span>
+<span class="fc" id="L249">    return out;</span>
+  }
+
+  // ---- input helpers
+
+  private static String text(Map&lt;String, Object&gt; in, String field, int min, int max) {
+<span class="pc bpc" id="L255" title="1 of 8 branches missed.">    if (!(in.get(field) instanceof String s) || s.isBlank() || s.length() &lt; min || s.length() &gt; max) {</span>
+<span class="fc" id="L256">      throw new ApiException(400, &quot;VALIDATION&quot;, field + &quot; must be a string of &quot; + min + &quot;-&quot; + max + &quot; characters&quot;);</span>
+    }
+<span class="fc" id="L258">    return s;</span>
+  }
+
+  private static int integer(Map&lt;String, Object&gt; in, String field, int min, int max) {
+<span class="fc bfc" id="L262" title="All 2 branches covered.">    if (in.get(field) instanceof BigDecimal d) {</span>
+      try {
+<span class="fc" id="L264">        int v = d.intValueExact();</span>
+<span class="fc bfc" id="L265" title="All 4 branches covered.">        if (v &gt;= min &amp;&amp; v &lt;= max) {</span>
+<span class="fc" id="L266">          return v;</span>
+        }
+<span class="fc" id="L268">      } catch (ArithmeticException e) {</span>
+        // fall through to the error below
+<span class="fc" id="L270">      }</span>
+    }
+<span class="fc" id="L272">    throw new ApiException(400, &quot;VALIDATION&quot;, field + &quot; must be a whole number &quot; + min + &quot;-&quot; + max);</span>
+  }
+
+  private static BigDecimal money(Object v) {
+<span class="fc bfc" id="L276" title="All 8 branches covered.">    if (v instanceof BigDecimal d &amp;&amp; d.signum() &gt; 0 &amp;&amp; d.scale() &lt;= 2 &amp;&amp; d.compareTo(new BigDecimal(&quot;1000&quot;)) &lt;= 0) {</span>
+<span class="fc" id="L277">      return d.setScale(2);</span>
+    }
+<span class="fc" id="L279">    throw new ApiException(400, &quot;VALIDATION&quot;, &quot;amount must be 0.01-1000.00 with at most two decimals&quot;);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
