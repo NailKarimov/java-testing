@@ -13,7 +13,7 @@ alone (`com.sun.net.httpserver` and a small JSON reader), so the tests have noth
 | **Types of testing** | functional API, mocking (service virtualisation), BDD, consumer-driven contracts, concurrency |
 | **Tests** | 89 (~15 s); line coverage 88 % |
 | **Test quality** | 14/14 planted bugs caught (`scripts/mutants.py`, a CI job) |
-| **Reports** | [Allure](https://nailkarimov.github.io/java-testing/) · [Cucumber](https://nailkarimov.github.io/java-testing/cucumber/) · [JaCoCo](https://nailkarimov.github.io/java-testing/coverage/) · [pact file](https://nailkarimov.github.io/java-testing/pacts/) · [mutants](https://nailkarimov.github.io/java-testing/mutants/result.md) · [visual guide](https://nailkarimov.github.io/java-testing/java.html) |
+| **Reports** | [Allure](https://nailkarimov.github.io/java-testing/) · [Cucumber](https://nailkarimov.github.io/java-testing/cucumber/) · [JaCoCo](https://nailkarimov.github.io/java-testing/coverage/) · [pact file](https://nailkarimov.github.io/java-testing/pacts/library-web-library-api.json) · [mutants](https://nailkarimov.github.io/java-testing/mutants/result.md) · [visual guide](https://nailkarimov.github.io/java-testing/java.html) |
 
 ## What is tested
 
