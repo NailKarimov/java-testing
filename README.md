@@ -3,6 +3,7 @@
 [![Tests](https://github.com/NailKarimov/java-testing/actions/workflows/tests.yml/badge.svg)](https://github.com/NailKarimov/java-testing/actions/workflows/tests.yml)
 [![Allure report](https://img.shields.io/badge/report-Allure-orange)](https://nailkarimov.github.io/java-testing/)
 [![Release](https://img.shields.io/github/v/release/NailKarimov/java-testing)](https://github.com/NailKarimov/java-testing/releases)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/NailKarimov/java-testing?quickstart=1)
 
 ### ▶ Open online
 
@@ -50,6 +51,8 @@ alone (`com.sun.net.httpserver` and a small JSON reader), so the tests have noth
   Pages. That is how failures were read when the Actions logs were out of reach.
 
 ## Running it
+
+No local setup: the **Open in GitHub Codespaces** badge starts a browser VS Code with this repository, its tools and Docker; the container runs `mvn -q -DskipTests test-compile` on creation, then `mvn test` works in the terminal.
 
 Requirements: JDK 21, Maven 3.9.
 
