@@ -1,0 +1,27 @@
+<div>POST to http://127.0.0.1:45295/books</div>
+
+    <h4>Body</h4>
+    <div>
+    <pre class="preformated-text">
+{
+    &quot;isbn&quot;: &quot;9790003694580&quot;,
+    &quot;copies&quot;: 1
+}    </pre>
+    </div>
+
+    <h4>Headers</h4>
+    <div>
+            <div>Accept: */*</div>
+            <div>Content-Type: application/json</div>
+    </div>
+
+
+
+    <h4>Curl</h4>
+    <div>
+        curl -v -X POST &#39;http://127.0.0.1:45295/books&#39; -H &#39;Accept: */*&#39; -H &#39;Content-Type: application/json&#39; -d &#39;{
+    &quot;isbn&quot;: &quot;9790003694580&quot;,
+    &quot;copies&quot;: 1
+}&#39;
+    </div>
+
