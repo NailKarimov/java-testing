@@ -3,6 +3,19 @@
 [![Tests](https://github.com/NailKarimov/java-testing/actions/workflows/tests.yml/badge.svg)](https://github.com/NailKarimov/java-testing/actions/workflows/tests.yml)
 [![Allure report](https://img.shields.io/badge/report-Allure-orange)](https://nailkarimov.github.io/java-testing/)
 
+### ▶ Open online
+
+| Page | What it is |
+| --- | --- |
+| **[Allure test report](https://nailkarimov.github.io/java-testing/)** | latest CI run |
+| [Cucumber report](https://nailkarimov.github.io/java-testing/cucumber/) | BDD scenarios |
+| [JaCoCo coverage](https://nailkarimov.github.io/java-testing/coverage/) | latest CI run |
+| [Pact contract](https://nailkarimov.github.io/java-testing/pacts/library-web-library-api.json) | JSON |
+| [Planted bugs](https://nailkarimov.github.io/java-testing/mutants/result.md) | mutation check result |
+| [Java tests](https://nailkarimov.github.io/java-testing/java.html) | interactive guide |
+
+Click these links: opening an `.html` file in the file list shows its source code, GitHub does not run it.
+
 API, mocking, BDD and contract tests **in Java**. They run against a Library API of our own, written on the JDK
 alone (`com.sun.net.httpserver` and a small JSON reader), so the tests have nothing to hide behind.
 
