@@ -2,6 +2,7 @@
 
 [![Tests](https://github.com/NailKarimov/java-testing/actions/workflows/tests.yml/badge.svg)](https://github.com/NailKarimov/java-testing/actions/workflows/tests.yml)
 [![Allure report](https://img.shields.io/badge/report-Allure-orange)](https://nailkarimov.github.io/java-testing/)
+[![Release](https://img.shields.io/github/v/release/NailKarimov/java-testing)](https://github.com/NailKarimov/java-testing/releases)
 
 ### ▶ Open online
 
@@ -83,6 +84,8 @@ docs/                             test plan, test report, guides
 - it publishes the Allure report with history, the Cucumber report, JaCoCo, the pact file and diagnostics to
   GitHub Pages;
 - the `mutants` job runs the mutation check and publishes `mutants/result.md`.
+
+Releases: committing `.github/releases/<tag>.md` runs the Release workflow, which creates the tag and the GitHub release with that file as its notes.
 
 ## Documentation
 
