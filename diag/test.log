@@ -1,5 +1,5 @@
 [INFO] Scanning for projects...
-[INFO] Loaded 24259 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 24273 auto-discovered prefixes for remote repository central (prefixes-central.txt)
 [INFO] 
 [INFO] --------------------< dev.nailkarimov:java-testing >--------------------
 [INFO] Building Library API tests in Java 1.0.0
@@ -32,6 +32,18 @@
 SLF4J: No SLF4J providers were found.
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+[INFO] Running dev.nailkarimov.library.api.MembersApiTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.671 s -- in dev.nailkarimov.library.api.MembersApiTest
+[INFO] Running dev.nailkarimov.library.api.BooksApiTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.640 s -- in dev.nailkarimov.library.api.BooksApiTest
+[INFO] Running dev.nailkarimov.library.api.HttpProtocolTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.322 s -- in dev.nailkarimov.library.api.HttpProtocolTest
+[INFO] Running dev.nailkarimov.library.api.LoansApiTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.969 s -- in dev.nailkarimov.library.api.LoansApiTest
+[INFO] Running dev.nailkarimov.library.mock.CatalogueFaultsTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.348 s -- in dev.nailkarimov.library.mock.CatalogueFaultsTest
+[INFO] Running dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.185 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
 [INFO] Running dev.nailkarimov.library.contract.LibraryApiProviderPactTest
 
 Verifying a pact between library-web and library-api
@@ -65,19 +77,7 @@ Verifying a pact between library-web and library-api
     returns a response which
       has status code 404 (OK)
       has a matching body (OK)
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.207 s -- in dev.nailkarimov.library.contract.LibraryApiProviderPactTest
-[INFO] Running dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.540 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
-[INFO] Running dev.nailkarimov.library.mock.CatalogueFaultsTest
-[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.519 s -- in dev.nailkarimov.library.mock.CatalogueFaultsTest
-[INFO] Running dev.nailkarimov.library.api.HttpProtocolTest
-[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.542 s -- in dev.nailkarimov.library.api.HttpProtocolTest
-[INFO] Running dev.nailkarimov.library.api.MembersApiTest
-[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.327 s -- in dev.nailkarimov.library.api.MembersApiTest
-[INFO] Running dev.nailkarimov.library.api.BooksApiTest
-[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.415 s -- in dev.nailkarimov.library.api.BooksApiTest
-[INFO] Running dev.nailkarimov.library.api.LoansApiTest
-[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.800 s -- in dev.nailkarimov.library.api.LoansApiTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.540 s -- in dev.nailkarimov.library.contract.LibraryApiProviderPactTest
 [INFO] Running dev.nailkarimov.library.bdd.RunCucumberTest
 
 Scenario: Borrowing takes the copy off the shelf           # features/lending.feature:10
@@ -178,7 +178,7 @@ Scenario: Three books at a time                            # features/lending.fe
   When Ann returns "Oblomov"                               # dev.nailkarimov.library.bdd.LendingSteps.returns(java.lang.String,java.lang.String)
   And Ann borrows "The Idiot"                              # dev.nailkarimov.library.bdd.LendingSteps.borrows(java.lang.String,java.lang.String)
   Then the loan is due on 2026-10-15                       # dev.nailkarimov.library.bdd.LendingSteps.dueOn(java.time.LocalDate)
-[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.150 s -- in dev.nailkarimov.library.bdd.RunCucumberTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.057 s -- in dev.nailkarimov.library.bdd.RunCucumberTest
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -191,6 +191,6 @@ Scenario: Three books at a time                            # features/lending.fe
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  14.258 s
-[INFO] Finished at: 2026-10-27T10:10:44Z
+[INFO] Total time:  14.675 s
+[INFO] Finished at: 2026-10-28T10:57:01Z
 [INFO] ------------------------------------------------------------------------
