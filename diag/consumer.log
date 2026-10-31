@@ -1,5 +1,5 @@
 [INFO] Scanning for projects...
-[INFO] Loaded 24299 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 24313 auto-discovered prefixes for remote repository central (prefixes-central.txt)
 [INFO] 
 [INFO] --------------------< dev.nailkarimov:java-testing >--------------------
 [INFO] Building Library API tests in Java 1.0.0
@@ -34,7 +34,7 @@ SLF4J: No SLF4J providers were found.
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
 [INFO] Running dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.112 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.723 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -46,6 +46,6 @@ SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  6.107 s
-[INFO] Finished at: 2026-10-30T11:08:57Z
+[INFO] Total time:  4.716 s
+[INFO] Finished at: 2026-10-31T10:42:04Z
 [INFO] ------------------------------------------------------------------------
