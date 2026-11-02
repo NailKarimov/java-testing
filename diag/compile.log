@@ -1,11 +1,11 @@
 [INFO] Scanning for projects...
-[INFO] Loaded 24318 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 24333 auto-discovered prefixes for remote repository central (prefixes-central.txt)
 [INFO] 
 [INFO] --------------------< dev.nailkarimov:java-testing >--------------------
 [INFO] Building Library API tests in Java 1.0.0
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
-[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
+[INFO] Loaded 64 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
 [WARNING] Could not transfer metadata /.meta/prefixes.txt from/to jvnet-nexus-snapshots (https://maven.java.net/content/repositories/snapshots): (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
 [INFO] 
 [INFO] --- jacoco:0.8.12:prepare-agent (default) @ java-testing ---
@@ -27,6 +27,6 @@
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  6.050 s
-[INFO] Finished at: 2026-11-01T11:37:35Z
+[INFO] Total time:  6.179 s
+[INFO] Finished at: 2026-11-02T13:00:41Z
 [INFO] ------------------------------------------------------------------------
