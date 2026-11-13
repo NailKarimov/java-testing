@@ -1,23 +1,20 @@
 [INFO] Scanning for projects...
-[INFO] Loaded 24457 auto-discovered prefixes for remote repository central (prefixes-central.txt)
 [INFO] 
 [INFO] --------------------< dev.nailkarimov:java-testing >--------------------
 [INFO] Building Library API tests in Java 1.0.0
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
-[INFO] Loaded 64 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
-[WARNING] Could not transfer metadata /.meta/prefixes.txt from/to jvnet-nexus-snapshots (https://maven.java.net/content/repositories/snapshots): (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
 [INFO] 
 [INFO] --- jacoco:0.8.12:prepare-agent (default) @ java-testing ---
 [INFO] argLine set to -javaagent:/home/runner/.m2/repository/org/jacoco/org.jacoco.agent/0.8.12/org.jacoco.agent-0.8.12-runtime.jar=destfile=/home/runner/work/java-testing/java-testing/target/jacoco.exec
 [INFO] 
-[INFO] --- resources:3.5.0:resources (default-resources) @ java-testing ---
+[INFO] --- resources:3.4.0:resources (default-resources) @ java-testing ---
 [INFO] skip non existing resourceDirectory /home/runner/work/java-testing/java-testing/src/main/resources
 [INFO] 
 [INFO] --- compiler:3.13.0:compile (default-compile) @ java-testing ---
 [INFO] Nothing to compile - all classes are up to date.
 [INFO] 
-[INFO] --- resources:3.5.0:testResources (default-testResources) @ java-testing ---
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ java-testing ---
 [INFO] Copying 5 resources from src/test/resources to target/test-classes
 [INFO] 
 [INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ java-testing ---
@@ -32,18 +29,6 @@
 SLF4J: No SLF4J providers were found.
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
-[INFO] Running dev.nailkarimov.library.api.MembersApiTest
-[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.317 s -- in dev.nailkarimov.library.api.MembersApiTest
-[INFO] Running dev.nailkarimov.library.api.BooksApiTest
-[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.947 s -- in dev.nailkarimov.library.api.BooksApiTest
-[INFO] Running dev.nailkarimov.library.api.HttpProtocolTest
-[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.405 s -- in dev.nailkarimov.library.api.HttpProtocolTest
-[INFO] Running dev.nailkarimov.library.api.LoansApiTest
-[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.343 s -- in dev.nailkarimov.library.api.LoansApiTest
-[INFO] Running dev.nailkarimov.library.mock.CatalogueFaultsTest
-[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.385 s -- in dev.nailkarimov.library.mock.CatalogueFaultsTest
-[INFO] Running dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.518 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
 [INFO] Running dev.nailkarimov.library.contract.LibraryApiProviderPactTest
 
 Verifying a pact between library-web and library-api
@@ -77,7 +62,19 @@ Verifying a pact between library-web and library-api
     returns a response which
       has status code 404 (OK)
       has a matching body (OK)
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.634 s -- in dev.nailkarimov.library.contract.LibraryApiProviderPactTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.805 s -- in dev.nailkarimov.library.contract.LibraryApiProviderPactTest
+[INFO] Running dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.596 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
+[INFO] Running dev.nailkarimov.library.mock.CatalogueFaultsTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.560 s -- in dev.nailkarimov.library.mock.CatalogueFaultsTest
+[INFO] Running dev.nailkarimov.library.api.MembersApiTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.828 s -- in dev.nailkarimov.library.api.MembersApiTest
+[INFO] Running dev.nailkarimov.library.api.HttpProtocolTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.420 s -- in dev.nailkarimov.library.api.HttpProtocolTest
+[INFO] Running dev.nailkarimov.library.api.LoansApiTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.317 s -- in dev.nailkarimov.library.api.LoansApiTest
+[INFO] Running dev.nailkarimov.library.api.BooksApiTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.477 s -- in dev.nailkarimov.library.api.BooksApiTest
 [INFO] Running dev.nailkarimov.library.bdd.RunCucumberTest
 
 Scenario: Borrowing takes the copy off the shelf           # features/lending.feature:10
@@ -178,7 +175,7 @@ Scenario: Three books at a time                            # features/lending.fe
   When Ann returns "Oblomov"                               # dev.nailkarimov.library.bdd.LendingSteps.returns(java.lang.String,java.lang.String)
   And Ann borrows "The Idiot"                              # dev.nailkarimov.library.bdd.LendingSteps.borrows(java.lang.String,java.lang.String)
   Then the loan is due on 2026-10-15                       # dev.nailkarimov.library.bdd.LendingSteps.dueOn(java.time.LocalDate)
-[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.517 s -- in dev.nailkarimov.library.bdd.RunCucumberTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.482 s -- in dev.nailkarimov.library.bdd.RunCucumberTest
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -191,6 +188,6 @@ Scenario: Three books at a time                            # features/lending.fe
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  19.691 s
-[INFO] Finished at: 2026-11-12T05:06:40Z
+[INFO] Total time:  18.483 s
+[INFO] Finished at: 2026-11-13T05:06:29Z
 [INFO] ------------------------------------------------------------------------

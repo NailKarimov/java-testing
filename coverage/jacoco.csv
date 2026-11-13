@@ -6,8 +6,8 @@ Library API tests in Java,dev.nailkarimov.library,ApiException,0,16,0,0,0,6,0,3,
 Library API tests in Java,dev.nailkarimov.library,Library,17,820,6,72,2,136,6,49,0,16
 Library API tests in Java,dev.nailkarimov.library,LibraryServer.Ok,0,6,0,0,0,1,0,1,0,1
 Library API tests in Java,dev.nailkarimov.library,Json,186,547,30,67,35,129,28,41,0,13
-Library API tests in Java,dev.nailkarimov.library,Library.Book,0,15,0,0,0,6,0,1,0,1
 Library API tests in Java,dev.nailkarimov.library,CatalogueClient,23,193,5,17,4,42,5,10,0,4
+Library API tests in Java,dev.nailkarimov.library,Library.Book,0,15,0,0,0,6,0,1,0,1
 Library API tests in Java,dev.nailkarimov.library,Library.Loan,0,25,0,0,0,8,0,1,0,1
 Library API tests in Java,dev.nailkarimov.library,CatalogueClient.Retryable,0,4,0,0,0,2,0,1,0,1
 Library API tests in Java,dev.nailkarimov.library,Json.ParseException,0,6,0,0,0,2,0,1,0,1
