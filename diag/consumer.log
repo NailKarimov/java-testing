@@ -121,7 +121,7 @@ SLF4J: No SLF4J providers were found.
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
 [INFO] Running dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.586 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.884 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -133,6 +133,6 @@ SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  6.558 s
-[INFO] Finished at: 2026-11-17T05:06:05Z
+[INFO] Total time:  5.768 s
+[INFO] Finished at: 2026-11-18T05:06:13Z
 [INFO] ------------------------------------------------------------------------
