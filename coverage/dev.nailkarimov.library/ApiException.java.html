@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Library API tests in Java</a> &gt; <a href="index.source.html" class="el_package">dev.nailkarimov.library</a> &gt; <span class="el_source">ApiException.java</span></div><h1>ApiException.java</h1><pre class="source lang-java linenums">package dev.nailkarimov.library;
+
+/** A business or validation error that maps to an HTTP status and a stable machine-readable code. */
+public final class ApiException extends RuntimeException {
+  private static final long serialVersionUID = 1L;
+  private final int status;
+  private final String code;
+
+  public ApiException(int status, String code, String message) {
+<span class="fc" id="L10">    super(message);</span>
+<span class="fc" id="L11">    this.status = status;</span>
+<span class="fc" id="L12">    this.code = code;</span>
+<span class="fc" id="L13">  }</span>
+
+  public int status() {
+<span class="fc" id="L16">    return status;</span>
+  }
+
+  public String code() {
+<span class="fc" id="L20">    return code;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CatalogueClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Library API tests in Java</a> &gt; <a href="index.source.html" class="el_package">dev.nailkarimov.library</a> &gt; <span class="el_source">CatalogueClient.java</span></div><h1>CatalogueClient.java</h1><pre class="source lang-java linenums">package dev.nailkarimov.library;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Looks up a title and authors by ISBN in an external catalogue service: {@code GET {base}/isbn/{isbn}}.
+ *
+ * &lt;p&gt;One attempt plus one retry for a timeout, a dropped connection or a 5xx. A 404 means &quot;no such book&quot;. An answer
+ * without a title is the catalogue's fault, not the user's, and is reported as a bad gateway.
+ */
+public class CatalogueClient {
+  /** What the catalogue knows about a book. */
+<span class="fc" id="L22">  public record Entry(String title, List&lt;String&gt; authors) {}</span>
+
+  private final HttpClient http;
+  private final String base;
+  private final Duration timeout;
+
+<span class="fc" id="L28">  public CatalogueClient(String base, Duration timeout) {</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">    this.base = base.endsWith(&quot;/&quot;) ? base.substring(0, base.length() - 1) : base;</span>
+<span class="fc" id="L30">    this.timeout = timeout;</span>
+<span class="fc" id="L31">    this.http = HttpClient.newBuilder().connectTimeout(timeout).version(HttpClient.Version.HTTP_1_1).build();</span>
+<span class="fc" id="L32">  }</span>
+
+  public Entry lookup(String isbn) {
+<span class="fc" id="L35">    ApiException last = null;</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">    for (int attempt = 1; attempt &lt;= 2; attempt++) {</span>
+      try {
+<span class="fc" id="L38">        return once(isbn);</span>
+<span class="fc" id="L39">      } catch (Retryable e) {</span>
+<span class="fc" id="L40">        last = new ApiException(503, &quot;CATALOGUE_UNAVAILABLE&quot;, &quot;catalogue unavailable: &quot; + e.getMessage());</span>
+      }
+    }
+<span class="fc" id="L43">    throw last;</span>
+  }
+
+  private static final class Retryable extends Exception {
+    private static final long serialVersionUID = 1L;
+
+    Retryable(String message) {
+<span class="fc" id="L50">      super(message);</span>
+<span class="fc" id="L51">    }</span>
+  }
+
+  private Entry once(String isbn) throws Retryable {
+<span class="fc" id="L55">    HttpRequest req =</span>
+<span class="fc" id="L56">        HttpRequest.newBuilder(URI.create(base + &quot;/isbn/&quot; + isbn))</span>
+<span class="fc" id="L57">            .timeout(timeout)</span>
+<span class="fc" id="L58">            .header(&quot;Accept&quot;, &quot;application/json&quot;)</span>
+<span class="fc" id="L59">            .GET()</span>
+<span class="fc" id="L60">            .build();</span>
+    HttpResponse&lt;String&gt; res;
+    try {
+<span class="fc" id="L63">      res = http.send(req, HttpResponse.BodyHandlers.ofString());</span>
+<span class="fc" id="L64">    } catch (HttpTimeoutException e) {</span>
+<span class="fc" id="L65">      throw new Retryable(&quot;timeout after &quot; + timeout.toMillis() + &quot; ms&quot;);</span>
+<span class="fc" id="L66">    } catch (IOException e) {</span>
+<span class="fc" id="L67">      throw new Retryable(e.getClass().getSimpleName());</span>
+<span class="nc" id="L68">    } catch (InterruptedException e) {</span>
+<span class="nc" id="L69">      Thread.currentThread().interrupt();</span>
+<span class="nc" id="L70">      throw new ApiException(503, &quot;CATALOGUE_UNAVAILABLE&quot;, &quot;interrupted&quot;);</span>
+<span class="fc" id="L71">    }</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">    if (res.statusCode() == 404) {</span>
+<span class="fc" id="L73">      throw new ApiException(422, &quot;UNKNOWN_ISBN&quot;, &quot;the catalogue does not know isbn &quot; + isbn);</span>
+    }
+<span class="fc bfc" id="L75" title="All 2 branches covered.">    if (res.statusCode() &gt;= 500) {</span>
+<span class="fc" id="L76">      throw new Retryable(&quot;status &quot; + res.statusCode());</span>
+    }
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">    if (res.statusCode() != 200) {</span>
+<span class="nc" id="L79">      throw badGateway(&quot;status &quot; + res.statusCode());</span>
+    }
+    Object body;
+    try {
+<span class="fc" id="L83">      body = Json.parse(res.body());</span>
+<span class="fc" id="L84">    } catch (Json.ParseException e) {</span>
+<span class="fc" id="L85">      throw badGateway(&quot;invalid JSON&quot;);</span>
+<span class="fc" id="L86">    }</span>
+<span class="pc bpc" id="L87" title="2 of 6 branches missed.">    if (!(body instanceof Map&lt;?, ?&gt; m) || !(m.get(&quot;title&quot;) instanceof String title) || title.isBlank()) {</span>
+<span class="fc" id="L88">      throw badGateway(&quot;no title&quot;);</span>
+    }
+<span class="fc" id="L90">    List&lt;String&gt; authors = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">    if (m.get(&quot;authors&quot;) instanceof List&lt;?&gt; l) {</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">      for (Object a : l) {</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if (a instanceof String s) {</span>
+<span class="fc" id="L94">          authors.add(s);</span>
+        }
+<span class="fc" id="L96">      }</span>
+    }
+<span class="fc" id="L98">    return new Entry(title, List.copyOf(authors));</span>
+  }
+
+  private static ApiException badGateway(String why) {
+<span class="fc" id="L102">    return new ApiException(502, &quot;CATALOGUE_BAD_RESPONSE&quot;, &quot;catalogue sent a bad answer: &quot; + why);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
