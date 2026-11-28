@@ -29,18 +29,16 @@
 SLF4J: No SLF4J providers were found.
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
-[INFO] Running dev.nailkarimov.library.mock.CatalogueFaultsTest
-[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.222 s -- in dev.nailkarimov.library.mock.CatalogueFaultsTest
-[INFO] Running dev.nailkarimov.library.api.HttpProtocolTest
-[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.666 s -- in dev.nailkarimov.library.api.HttpProtocolTest
-[INFO] Running dev.nailkarimov.library.api.BooksApiTest
-[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.393 s -- in dev.nailkarimov.library.api.BooksApiTest
-[INFO] Running dev.nailkarimov.library.api.MembersApiTest
-[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.242 s -- in dev.nailkarimov.library.api.MembersApiTest
 [INFO] Running dev.nailkarimov.library.api.LoansApiTest
-[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.551 s -- in dev.nailkarimov.library.api.LoansApiTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.622 s -- in dev.nailkarimov.library.api.LoansApiTest
+[INFO] Running dev.nailkarimov.library.api.BooksApiTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.456 s -- in dev.nailkarimov.library.api.BooksApiTest
+[INFO] Running dev.nailkarimov.library.api.HttpProtocolTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.303 s -- in dev.nailkarimov.library.api.HttpProtocolTest
+[INFO] Running dev.nailkarimov.library.api.MembersApiTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.312 s -- in dev.nailkarimov.library.api.MembersApiTest
 [INFO] Running dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.230 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.330 s -- in dev.nailkarimov.library.contract.LibraryWebConsumerPactTest
 [INFO] Running dev.nailkarimov.library.contract.LibraryApiProviderPactTest
 
 Verifying a pact between library-web and library-api
@@ -74,7 +72,9 @@ Verifying a pact between library-web and library-api
     returns a response which
       has status code 404 (OK)
       has a matching body (OK)
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.472 s -- in dev.nailkarimov.library.contract.LibraryApiProviderPactTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.481 s -- in dev.nailkarimov.library.contract.LibraryApiProviderPactTest
+[INFO] Running dev.nailkarimov.library.mock.CatalogueFaultsTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.355 s -- in dev.nailkarimov.library.mock.CatalogueFaultsTest
 [INFO] Running dev.nailkarimov.library.bdd.RunCucumberTest
 
 Scenario: Borrowing takes the copy off the shelf           # features/lending.feature:10
@@ -175,7 +175,7 @@ Scenario: Three books at a time                            # features/lending.fe
   When Ann returns "Oblomov"                               # dev.nailkarimov.library.bdd.LendingSteps.returns(java.lang.String,java.lang.String)
   And Ann borrows "The Idiot"                              # dev.nailkarimov.library.bdd.LendingSteps.borrows(java.lang.String,java.lang.String)
   Then the loan is due on 2026-10-15                       # dev.nailkarimov.library.bdd.LendingSteps.dueOn(java.time.LocalDate)
-[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.051 s -- in dev.nailkarimov.library.bdd.RunCucumberTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.263 s -- in dev.nailkarimov.library.bdd.RunCucumberTest
 [INFO] 
 [INFO] Results:
 [INFO] 
@@ -188,6 +188,6 @@ Scenario: Three books at a time                            # features/lending.fe
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  14.025 s
-[INFO] Finished at: 2026-11-27T05:06:19Z
+[INFO] Total time:  15.590 s
+[INFO] Finished at: 2026-11-28T05:06:06Z
 [INFO] ------------------------------------------------------------------------
